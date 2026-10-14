@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ОГЭ Задание 9: Академия Магии Уравнений</title>
+    <!-- Шрифты Google Fonts: стиль аниме-новеллы -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.5);
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --text-main: #f8fafc;
+            --accent-glow: #ec4899;
+            --correct: #22c55e;
+            --wrong: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #1a103c 50%, #0b1329 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        /* Главный контейнер на 2 экрана: игра + доска */
+        .app-container {
+            width: 100%;
+            max-width: 1550px;
+            height: 95vh;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 20px;
+        }
+
+        /* --- ЛЕВАЯ ЧАСТЬ: ИГРА И КВЕСТ --- */
+        .game-panel {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 12px 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            position: relative;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            flex-shrink: 0;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ec4899;
+            box-shadow: 0 0 15px var(--accent-glow);
+            animation: pulse-avatar 3s infinite alternate;
+        }
+
+        @keyframes pulse-avatar {
+            0% { transform: scale(1); box-shadow: 0 0 10px #ec4899; }
+            100% { transform: scale(1.05); box-shadow: 0 0 22px #8b5cf6; }
+        }
+
+        .hero-info {
+            flex-grow: 1;
+        }
+
+        .hero-name {
+            font-family: 'Comfortaa', cursive;
+            font-size: 1.2rem;
+            color: #f472b6;
+            margin-bottom: 2px;
+        }
+
+        .stage-title {
+            font-size: 0.95rem;
+            color: #93c5fd;
+            font-weight: 600;
+        }
+
+        .mana-bar-box {
+            margin-top: 6px;
+            width: 100%;
+        }
+
+        .mana-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            margin-bottom: 4px;
+        }
+
+        .mana-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .mana-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ec4899, #8b5cf6);
+            box-shadow: 0 0 10px #ec4899;
+            transition: width 0.5s ease;
+        }
+
+        .quest-area {
+            margin: 12px 0;
+            overflow-y: auto;
+            padding-right: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quest-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .quest-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .equation-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 10px 16px;
+            transition: all 0.2s;
+        }
+
+        .equation-row:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateX(4px);
+        }
+
+        .eq-num {
+            background: rgba(236, 72, 153, 0.2);
+            color: #f472b6;
+            font-weight: 800;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .eq-math {
+            font-size: 1.2rem;
+            font-family: 'Comfortaa', cursive;
+            flex-grow: 1;
+            letter-spacing: 1px;
+        }
+
+        .inputs-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .math-input {
+            width: 80px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            user-select: text;
+        }
+
+        .math-input:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+        }
+
+        .math-input.correct {
+            border-color: var(--correct);
+            background: rgba(34, 197, 94, 0.15);
+            box-shadow: 0 0 10px var(--correct);
+        }
+
+        .math-input.wrong {
+            border-color: var(--wrong);
+            background: rgba(239, 68, 68, 0.15);
+            box-shadow: 0 0 10px var(--wrong);
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        .controls-box {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-magic {
+            flex-grow: 1;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.05rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-family: 'Comfortaa', cursive;
+        }
+
+        .btn-magic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.6);
+        }
+
+        /* --- ПРАВАЯ ЧАСТЬ: ИНТЕРАКТИВНЫЙ ХОЛСТ-ЧЕРНОВИК --- */
+        .workspace-panel {
+            background: #ffffff;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            border: 4px solid #334155;
+            position: relative;
+        }
+
+        .board-header {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+        }
+
+        .board-formula-badge {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c084fc;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        /* Панель рисования */
+        .draw-toolbar {
+            background: #f1f5f9;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        .tool-btn {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .tool-btn.active {
+            background: #8b5cf6;
+            color: #ffffff;
+            border-color: #8b5cf6;
+        }
+
+        .color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .color-dot.active {
+            transform: scale(1.2);
+            border-color: #0f172a;
+        }
+
+        .size-slider {
+            width: 70px;
+            accent-color: #8b5cf6;
+            cursor: pointer;
+        }
+
+        /* Контейнер холста с клеткой */
+        .canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to right, rgba(99, 102, 241, 0.09) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(99, 102, 241, 0.09) 1px, transparent 1px);
+            background-size: 24px 24px;
+            touch-action: none; /* Защита от прокрутки на тачскринах */
+            cursor: crosshair;
+        }
+
+        #drawCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Модалка триумфа */
+        .modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 15, 30, 0.92);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+            z-index: 100;
+            border-radius: 24px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .spell-card-img {
+            width: 160px;
+            height: 160px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 4px solid #f472b6;
+            box-shadow: 0 0 35px #a855f7;
+            margin-bottom: 16px;
+            animation: floatSpell 3s ease-in-out infinite;
+        }
+
+        @keyframes floatSpell {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .spell-title {
+            font-family: 'Comfortaa', cursive;
+            font-size: 1.5rem;
+            color: #f43f5e;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.6);
+        }
+
+        .spell-desc {
+            color: #e2e8f0;
+            max-width: 440px;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .btn-next-stage {
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: 'Comfortaa', cursive;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            transition: 0.3s;
+        }
+
+        .btn-next-stage:hover {
+            transform: scale(1.05);
+        }
+
+        .hint-badge {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 2px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- ЛЕВАЯ ПАНЕЛЬ: ИГРА ОГЭ -->
+    <div class="game-panel">
+        
+        <!-- Шапка: Персонаж -->
+        <div class="hero-banner">
+            <div class="avatar-container">
+                <img id="heroAvatar" class="avatar-img" 
+                     src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop&q=80" 
+                     alt="Маг-ученик">
+            </div>
+            <div class="hero-info">
+                <div class="hero-name">Ученица Луна ✨</div>
+                <div class="stage-title" id="stageName">Этап 1: Стихия Воздуха (Линейные)</div>
+                <div class="mana-bar-box">
+                    <div class="mana-label">
+                        <span>Собрано сфер магии:</span>
+                        <span id="scoreText">0 / 5</span>
+                    </div>
+                    <div class="mana-track">
+                        <div class="mana-fill" id="manaProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Центральная область: Уравнения -->
+        <div class="quest-area" id="questList">
+            <!-- Уравнения генерируются через JS -->
+        </div>
+
+        <!-- Кнопка проверки -->
+        <div class="controls-box">
+            <button class="btn-magic" onclick="checkStageAnswers()">✨ Применить заклинание (Проверить)</button>
+        </div>
+
+        <!-- Модалка открытия заклинания -->
+        <div class="modal-overlay" id="victoryModal">
+            <img class="spell-card-img" id="spellImage" src="" alt="Заклинание">
+            <h2 class="spell-title" id="spellName">Круг Ветра Активирован!</h2>
+            <p class="spell-desc" id="spellStory">Прекрасно! Ты без труда расправился с линейными уравнениями и получил свиток урагана!</p>
+            <button class="btn-next-stage" id="nextStageBtn" onclick="nextStage()">Изучить следующую стихию ➔</button>
+        </div>
+    </div>
+
+    <!-- ПРАВАЯ ПАНЕЛЬ: ИНТЕРАКТИВНЫЙ ХОЛСТ ДЛЯ РЕШЕНИЯ -->
+    <div class="workspace-panel">
+        <div class="board-header">
+            <span>📝 Интерактивный лист решения</span>
+            <span class="board-formula-badge" id="formulaHint">Формула: ax + b = 0</span>
+        </div>
+
+        <!-- Панель инструментов пера -->
+        <div class="draw-toolbar">
+            <button class="tool-btn active" id="penTool" onclick="setTool('pen')">✏️ Перо</button>
+            <button class="tool-btn" id="eraserTool" onclick="setTool('eraser')">🧹 Ластик</button>
+            
+            <div style="display:flex; gap:6px; align-items:center; margin-left: 8px;">
+                <div class="color-dot active" style="background: #2563eb;" onclick="setColor('#2563eb', this)"></div>
+                <div class="color-dot" style="background: #0f172a;" onclick="setColor('#0f172a', this)"></div>
+                <div class="color-dot" style="background: #9333ea;" onclick="setColor('#9333ea', this)"></div>
+                <div class="color-dot" style="background: #db2777;" onclick="setColor('#db2777', this)"></div>
+            </div>
+
+            <input type="range" class="size-slider" id="penSize" min="1" max="10" value="3" title="Толщина пера" onchange="updateSize(this.value)">
+
+            <button class="tool-btn" style="margin-left: auto; color:#ef4444;" onclick="clearCanvas()">🗑️ Очистить</button>
+        </div>
+        
+        <!-- Сам холст -->
+        <div class="canvas-container" id="canvasWrap">
+            <canvas id="drawCanvas"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // БАЗА ДАННЫХ ИЗ ФИПИ (СТРОГО ПО КАРТИНКЕ ПОЛЬЗОВАТЕЛЯ)
+    const stagesData = [
+        {
+            stageId: 1,
+            name: "Этап 1: Стихия Воздуха (Линейные)",
+            formula: "Линейные: ax = -b ➔ x = -b / a",
+            avatar: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop&q=80",
+            spellImg: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80",
+            spellName: "🌪️ «Шквал Тысячи Ветров»",
+            spellStory: "Потрясающе! Линейные преграды сметены. Луна овладела контролем воздушных потоков!",
+            questions: [
+                { id: 1, math: "3x + 3 = 5x", roots: [1.5], type: "single" },
+                { id: 2, math: "6x + 1 = -4x", roots: [-0.1], type: "single" },
+                { id: 3, math: "-4x - 9 = 6x", roots: [-0.9], type: "single" },
+                { id: 4, math: "5(x + 9) = -8", roots: [-10.6], type: "single" },
+                { id: 5, math: "8 + 7x = 9x + 4", roots: [2], type: "single" }
+            ]
+        },
+        {
+            stageId: 2,
+            name: "Этап 2: Стихия Пламени (Неполные квадратные)",
+            formula: "ax² + bx = 0  или  ax² + c = 0",
+            avatar: "https://images.unsplash.com/photo-1563089145-599997674d42?w=300&auto=format&fit=crop&q=80",
+            spellImg: "https://images.unsplash.com/photo-1517594422361-5eeb8ae275a9?w=400&auto=format&fit=crop&q=80",
+            spellName: "🔥 «Огненный Метеор»",
+            spellStory: "Пламя подчинилось тебе! Неполные квадратные уравнения расщеплены на атомы!",
+            questions: [
+                { id: 1, math: "x² = 5x", roots: [0, 5], type: "double" },
+                { id: 2, math: "x² - 49 = 0", roots: [-7, 7], type: "double" },
+                { id: 3, math: "5x² - 10x = 0", roots: [0, 2], type: "double" },
+                { id: 4, math: "x² - 16 = 0", roots: [-4, 4], type: "double" },
+                { id: 5, math: "3x² = 9x", roots: [0, 3], type: "double" }
+            ]
+        },
+        {
+            stageId: 3,
+            name: "Этап 3: Стихия Молнии (Полные квадратные)",
+            formula: "D = b² - 4ac, x = (-b ± √D) / (2a)",
+            avatar: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=300&auto=format&fit=crop&q=80",
+            spellImg: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80",
+            spellName: "⚡ «Гнев Громовержца (Абсолют)»",
+            spellStory: "Невероятно! Ты полностью освоил задание №9 из ОГЭ! Луна стала Великим Архимагом Алгебры!",
+            questions: [
+                { id: 1, math: "x² - 6x + 5 = 0", roots: [1, 5], type: "double" },
+                { id: 2, math: "x² - 7x + 10 = 0", roots: [2, 5], type: "double" },
+                { id: 3, math: "x² - 9x + 18 = 0", roots: [3, 6], type: "double" },
+                { id: 4, math: "x² + 2x = 15", roots: [-5, 3], type: "double" },
+                { id: 5, math: "2x² - 3x + 1 = 0", roots: [0.5, 1], type: "double" }
+            ]
+        }
+    ];
+
+    let currentStageIndex = 0;
+
+    // Инициализация при старте
+    function renderStage() {
+        const stage = stagesData[currentStageIndex];
+        
+        document.getElementById('stageName').textContent = stage.name;
+        document.getElementById('formulaHint').textContent = stage.formula;
+        document.getElementById('heroAvatar').src = stage.avatar;
+        document.getElementById('manaProgress').style.width = '0%';
+        document.getElementById('scoreText').textContent = `0 / ${stage.questions.length}`;
+
+        const questList = document.getElementById('questList');
+        questList.innerHTML = '';
+
+        stage.questions.forEach((q, idx) => {
+            const row = document.createElement('div');
+            row.className = 'equation-row';
+            
+            let inputsHtml = '';
+            if(q.type === 'single') {
+                inputsHtml = `
+                    <div class="inputs-wrap">
+                        <input type="text" class="math-input" id="q_${idx}_0" placeholder="x" autocomplete="off">
+                    </div>
+                `;
+            } else {
+                inputsHtml = `
+                    <div class="inputs-wrap">
+                        <input type="text" class="math-input" id="q_${idx}_0" placeholder="x₁" title="Меньший корень" autocomplete="off">
+                        <input type="text" class="math-input" id="q_${idx}_1" placeholder="x₂" title="Больший корень" autocomplete="off">
+                    </div>
+                `;
+            }
+
+            row.innerHTML = `
+                <div style="display:flex; align-items:center;">
+                    <div class="eq-num">${idx + 1}</div>
+                    <div>
+                        <div class="eq-math">${q.math}</div>
+                        ${q.type === 'double' ? '<span class="hint-badge">Корни: от меньшего к большему</span>' : ''}
+                    </div>
+                </div>
+                ${inputsHtml}
+            `;
+            questList.appendChild(row);
+        });
+    }
+
+    // Проверка ответов
+    function checkStageAnswers() {
+        const stage = stagesData[currentStageIndex];
+        let correctCount = 0;
+
+        stage.questions.forEach((q, idx) => {
+            if (q.type === 'single') {
+                const input = document.getElementById(`q_${idx}_0`);
+                const val = parseNum(input.value);
+                
+                if (val !== null && Math.abs(val - q.roots[0]) < 0.001) {
+                    input.className = 'math-input correct';
+                    correctCount++;
+                } else {
+                    input.className = 'math-input wrong';
+                }
+            } else {
+                const in1 = document.getElementById(`q_${idx}_0`);
+                const in2 = document.getElementById(`q_${idx}_1`);
+                const val1 = parseNum(in1.value);
+                const val2 = parseNum(in2.value);
+
+                const sortedRoots = [...q.roots].sort((a,b) => a - b);
+
+                let is1Correct = val1 !== null && Math.abs(val1 - sortedRoots[0]) < 0.001;
+                let is2Correct = val2 !== null && Math.abs(val2 - sortedRoots[1]) < 0.001;
+
+                in1.className = is1Correct ? 'math-input correct' : 'math-input wrong';
+                in2.className = is2Correct ? 'math-input correct' : 'math-input wrong';
+
+                if(is1Correct && is2Correct) {
+                    correctCount++;
+                }
+            }
+        });
+
+        const percentage = (correctCount / stage.questions.length) * 100;
+        document.getElementById('manaProgress').style.width = `${percentage}%`;
+        document.getElementById('scoreText').textContent = `${correctCount} / ${stage.questions.length}`;
+
+        if (correctCount === stage.questions.length) {
+            setTimeout(openSpellModal, 400);
+        }
+    }
+
+    function parseNum(str) {
+        if (!str) return null;
+        const normalized = str.trim().replace(',', '.');
+        const num = parseFloat(normalized);
+        return isNaN(num) ? null : num;
+    }
+
+    function openSpellModal() {
+        const stage = stagesData[currentStageIndex];
+        document.getElementById('spellImage').src = stage.spellImg;
+        document.getElementById('spellName').textContent = stage.spellName;
+        document.getElementById('spellStory').textContent = stage.spellStory;
+
+        const nextBtn = document.getElementById('nextStageBtn');
+        if (currentStageIndex === stagesData.length - 1) {
+            nextBtn.textContent = "🏆 Пройти курс заново!";
+        } else {
+            nextBtn.textContent = "Изучить следующую стихию ➔";
+        }
+
+        document.getElementById('victoryModal').style.display = 'flex';
+    }
+
+    function nextStage() {
+        document.getElementById('victoryModal').style.display = 'none';
+        currentStageIndex++;
+        if (currentStageIndex >= stagesData.length) {
+            currentStageIndex = 0;
+        }
+        clearCanvas(); // Очищаем черновик для новой стихии
+        renderStage();
+    }
+
+    // --- ЛОГИКА ИНТЕРАКТИВНОГО ХОЛСТА (CANVAS) ---
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    const wrap = document.getElementById('canvasWrap');
+
+    let isDrawing = false;
+    let currentColor = '#2563eb';
+    let currentSize = 3;
+    let currentTool = 'pen'; // 'pen' или 'eraser'
+
+    // Подгоняем разрешение холста под размер контейнера
+    function resizeCanvas() {
+        const rect = wrap.getBoundingClientRect();
+        // Сохраняем рисунок при ресайзе
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(canvas, 0, 0);
+
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+
+        ctx.drawImage(tempCanvas, 0, 0);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    // Инициализируем размер после первой отрисовки DOM
+    setTimeout(resizeCanvas, 100);
+
+    function startDrawing(e) {
+        isDrawing = true;
+        draw(e);
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+
+        // Позиция курсора или тача относительно холста
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        ctx.lineWidth = currentSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (currentTool === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = currentSize * 4; // ластик шире пера
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = currentColor;
+        }
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    // Слушатели событий мыши
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDrawing);
+
+    // Слушатели для сенсорных экранов / планшетов
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
+    window.addEventListener('touchend', stopDrawing);
+
+    // Управление инструментами
+    function setTool(tool) {
+        currentTool = tool;
+        document.getElementById('penTool').classList.toggle('active', tool === 'pen');
+        document.getElementById('eraserTool').classList.toggle('active', tool === 'eraser');
+    }
+
+    function setColor(color, element) {
+        currentColor = color;
+        setTool('pen');
+        document.querySelectorAll('.color-dot').forEach(dot => dot.classList.remove('active'));
+        element.classList.add('active');
+    }
+
+    function updateSize(size) {
+        currentSize = size;
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Первый запуск
+    renderStage();
+</script>
+
+</body>
+</html>
