@@ -456,6 +456,52 @@
             margin-top: 2px;
             display: block;
         }
+
+        /* ============================================================
+           АДАПТИВНОСТЬ: планшеты и телефоны (до 900 px)
+           ============================================================ */
+        @media (max-width: 900px) {
+            body {
+                overflow: hidden;
+                overflow-y: auto;
+                align-items: flex-start;
+                padding: 10px;
+            }
+
+            .app-container {
+                height: auto;
+                min-height: auto;
+                grid-template-columns: 1fr;
+                gap: 15px;
+                max-width: 100%;
+            }
+
+            .game-panel,
+            .workspace-panel {
+                height: auto;
+            }
+
+            /* Удобные размеры полей и кнопок на узких экранах */
+            .math-input {
+                width: 90px;
+                font-size: 1rem;
+                padding: 10px 12px;
+            }
+
+            .btn-magic {
+                font-size: 1rem;
+                padding: 16px;
+            }
+
+            .tool-btn {
+                padding: 8px 14px;
+                font-size: 0.9rem;
+            }
+
+            .canvas-container {
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -687,9 +733,12 @@
 
     function parseNum(str) {
         if (!str) return null;
-        const normalized = str.trim().replace(',', '.');
-        const num = parseFloat(normalized);
-        return isNaN(num) ? null : num;
+        const trimmed = str.trim();
+        // Строгая проверка: только целые и десятичные числа (с точкой или запятой),
+        // включая отрицательные. Отвергает буквы, лишние символы, multiple точки и т.п.
+        if (!/^-?\d+([.,]\d+)?$/.test(trimmed)) return null;
+        const normalized = trimmed.replace(',', '.');
+        return parseFloat(normalized);
     }
 
     function openSpellModal() {
